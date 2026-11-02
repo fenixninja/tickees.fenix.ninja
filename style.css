@@ -643,6 +643,143 @@ h1.logo-title span:last-child {
   background: #ffffff;
 }
 
+/* Botón Comprar Entrada Inicial */
+.btn-buy-ticket {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 270px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  user-select: none;
+}
+
+.btn-buy-ticket:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.btn-buy-ticket:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Control de Visibilidad de los 3 Estados */
+.ticket-serial.state-initial .ticket-qr-wrapper,
+.ticket-serial.state-initial .ticket-success-box {
+  display: none !important;
+}
+
+.ticket-serial.state-qr-revealed .btn-buy-ticket,
+.ticket-serial.state-qr-revealed .ticket-success-box {
+  display: none !important;
+}
+
+.ticket-serial.state-purchased .btn-buy-ticket,
+.ticket-serial.state-purchased .ticket-qr-wrapper {
+  display: none !important;
+}
+
+/* Animación de entrada para el QR y el Success Box */
+.ticket-serial.state-qr-revealed .ticket-qr-wrapper,
+.ticket-serial.state-purchased .ticket-success-box {
+  display: flex !important;
+  animation: ticketPopIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes ticketPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Caja de Éxito / Compra Realizada */
+.ticket-success-box {
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 270px;
+  padding: 14px 16px;
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(22, 163, 74, 0.12);
+}
+
+.success-badge-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #15803d;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.success-units-count {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #166534;
+}
+
+.btn-buy-another {
+  width: 100%;
+  padding: 8px 12px;
+  background: #ffffff;
+  color: #15803d;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 8px;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.btn-buy-another:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+  transform: translateY(-1px);
+}
+
+.btn-cancel-qr {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+  margin-top: 2px;
+}
+
+.btn-cancel-qr:hover {
+  color: #475569;
+}
+
 .ticket-qr-wrapper {
   display: flex;
   flex-direction: column;
@@ -723,6 +860,7 @@ h1.logo-title span:last-child {
 .ticket-actions {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 6px;
   width: 100%;
   max-width: 270px;
@@ -749,32 +887,6 @@ h1.logo-title span:last-child {
 .btn-scan-wa:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
-}
-
-.btn-simulate-scan {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  padding: 7px 12px;
-  background: #f8fafc;
-  color: #475569;
-  border: 1.5px dashed #cbd5e1;
-  font-weight: 600;
-  font-size: 0.78rem;
-  font-family: "Outfit", sans-serif;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-simulate-scan:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-  border-color: var(--aurora-teal);
-  border-style: solid;
-  transform: translateY(-1px);
 }
 
 .numbers-wrapper {

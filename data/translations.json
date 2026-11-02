@@ -14,7 +14,7 @@
     "ticketsAvailable": "ENTRADAS DISPONIBLES",
     "fromPrice": "DESDE",
     "myTickets": "Mis Entradas",
-    "emptyTickets": "Aún no tienes entradas. ¡Escanea el código QR de un concierto para añadirla!",
+    "emptyTickets": "Aún no tienes entradas. ¡Elige un concierto y pulsa en Comprar Entrada!",
     "scanWithWhatsApp": "Escanear en WhatsApp",
     "simulateScan": "Simular Escaneo",
     "ticketAdded": "¡Entrada añadida a tu cartera!",
@@ -22,7 +22,11 @@
     "clearTickets": "Vaciar Cartera",
     "units": "entradas",
     "verifiedBy": "WhatAuth Pixel Verificado",
-    "ticketCode": "Código"
+    "ticketCode": "Código",
+    "purchaseCompleted": "✓ COMPRA REALIZADA",
+    "buyAnotherTicket": "+ Comprar otra entrada",
+    "ticketsInWallet": "entradas en tu cartera",
+    "cancel": "Volver"
   },
   "en": {
     "appTitle": "TICKEES",
@@ -39,7 +43,7 @@
     "ticketsAvailable": "TICKETS AVAILABLE",
     "fromPrice": "FROM",
     "myTickets": "My Tickets",
-    "emptyTickets": "No tickets yet. Scan a concert QR code to add one!",
+    "emptyTickets": "No tickets yet. Choose a concert and click Buy Ticket!",
     "scanWithWhatsApp": "Scan on WhatsApp",
     "simulateScan": "Simulate Scan",
     "ticketAdded": "Ticket added to your wallet!",
@@ -47,7 +51,11 @@
     "clearTickets": "Clear Wallet",
     "units": "tickets",
     "verifiedBy": "WhatAuth Verified Pixel",
-    "ticketCode": "Code"
+    "ticketCode": "Code",
+    "purchaseCompleted": "✓ PURCHASE COMPLETED",
+    "buyAnotherTicket": "+ Buy another ticket",
+    "ticketsInWallet": "tickets in your wallet",
+    "cancel": "Back"
   },
   "de": {
     "appTitle": "TICKEES",
@@ -64,7 +72,7 @@
     "ticketsAvailable": "TICKETS VERFÜGBAR",
     "fromPrice": "AB",
     "myTickets": "Meine Tickets",
-    "emptyTickets": "Noch keine Tickets. Scanne einen Konzert-QR-Code, um eins hinzuzufügen!",
+    "emptyTickets": "Noch keine Tickets. Wähle ein Konzert und klicke auf Ticket kaufen!",
     "scanWithWhatsApp": "In WhatsApp scannen",
     "simulateScan": "Scan simulieren",
     "ticketAdded": "Ticket zur Wallet hinzugefügt!",
@@ -72,7 +80,11 @@
     "clearTickets": "Wallet leeren",
     "units": "Tickets",
     "verifiedBy": "WhatAuth Verifiziert",
-    "ticketCode": "Code"
+    "ticketCode": "Code",
+    "purchaseCompleted": "✓ KAUF ABGESCHLOSSEN",
+    "buyAnotherTicket": "+ Ein weiteres Ticket kaufen",
+    "ticketsInWallet": "Tickets in deiner Wallet",
+    "cancel": "Zurück"
   },
   "fr": {
     "appTitle": "TICKEES",
@@ -89,7 +101,7 @@
     "ticketsAvailable": "BILLETS DISPONIBLES",
     "fromPrice": "DÈS",
     "myTickets": "Mes Billets",
-    "emptyTickets": "Aucun billet pour le moment. Scannez le QR code d'un concert pour en ajouter !",
+    "emptyTickets": "Aucun billet pour le moment. Choisissez un concert et cliquez sur Acheter Billet !",
     "scanWithWhatsApp": "Scanner sur WhatsApp",
     "simulateScan": "Simuler le scan",
     "ticketAdded": "Billet ajouté à votre portefeuille !",
@@ -97,7 +109,11 @@
     "clearTickets": "Vider le portefeuille",
     "units": "billets",
     "verifiedBy": "Pixel WhatAuth Vérifié",
-    "ticketCode": "Code"
+    "ticketCode": "Code",
+    "purchaseCompleted": "✓ ACHAT EFFECTUÉ",
+    "buyAnotherTicket": "+ Acheter un autre billet",
+    "ticketsInWallet": "billets dans votre portefeuille",
+    "cancel": "Retour"
   },
   "hi": {
     "appTitle": "TICKEES",
@@ -114,7 +130,7 @@
     "ticketsAvailable": "टिकट उपलब्ध हैं",
     "fromPrice": "न्यूनतम",
     "myTickets": "मेरे टिकट",
-    "emptyTickets": "अभी कोई टिकट नहीं है। टिकट जोड़ने के लिए किसी कॉन्सर्ट का QR कोड स्कैन करें!",
+    "emptyTickets": "अभी कोई टिकट नहीं है। कॉन्सर्ट चुनें और टिकट खरीदें पर क्लिक करें!",
     "scanWithWhatsApp": "व्हाट्सएप पर स्कैन करें",
     "simulateScan": "स्कैन का अनुकरण करें",
     "ticketAdded": "टिकट आपके वॉलेट में जोड़ा गया!",
@@ -122,7 +138,11 @@
     "clearTickets": "वॉलेट खाली करें",
     "units": "टिकट",
     "verifiedBy": "WhatAuth सत्यापित पिक्सेल",
-    "ticketCode": "कोड"
+    "ticketCode": "कोड",
+    "purchaseCompleted": "✓ खरीदारी पूरी हुई",
+    "buyAnotherTicket": "+ एक और टिकट खरीदें",
+    "ticketsInWallet": "टिकट आपके वॉलेट में",
+    "cancel": "वापस"
   },
   "zh": {
     "appTitle": "TICKEES",
@@ -139,7 +159,7 @@
     "ticketsAvailable": "门票热售中",
     "fromPrice": "起价",
     "myTickets": "我的门票",
-    "emptyTickets": "暂无门票。扫描演唱会 QR 码即可添加！",
+    "emptyTickets": "暂无门票。选择演出并点击购买门票！",
     "scanWithWhatsApp": "在 WhatsApp 上扫描",
     "simulateScan": "模拟扫描",
     "ticketAdded": "门票已存入卡包！",
@@ -147,7 +167,11 @@
     "clearTickets": "清空卡包",
     "units": "张门票",
     "verifiedBy": "WhatAuth 验证像素",
-    "ticketCode": "验证码"
+    "ticketCode": "验证码",
+    "purchaseCompleted": "✓ 购票成功",
+    "buyAnotherTicket": "+ 再次购买门票",
+    "ticketsInWallet": "张门票在您的卡包中",
+    "cancel": "返回"
   },
   "ja": {
     "appTitle": "TICKEES",
@@ -164,7 +188,7 @@
     "ticketsAvailable": "チケット販売中",
     "fromPrice": "から",
     "myTickets": "マイチケット",
-    "emptyTickets": "まだチケットがありません。コンサートのQRコードをスキャンして追加してください！",
+    "emptyTickets": "まだチケットがありません。コンサートを選択してチケット購入をクリック！",
     "scanWithWhatsApp": "WhatsAppでスキャン",
     "simulateScan": "スキャンをシミュレート",
     "ticketAdded": "チケットが追加されました！",
@@ -172,6 +196,10 @@
     "clearTickets": "ウォレットをクリア",
     "units": "枚",
     "verifiedBy": "WhatAuth 認証ピクセル",
-    "ticketCode": "コード"
+    "ticketCode": "コード",
+    "purchaseCompleted": "✓ 購入完了",
+    "buyAnotherTicket": "+ もう1枚購入する",
+    "ticketsInWallet": "枚のチケットがウォレットにあります",
+    "cancel": "戻る"
   }
 }
