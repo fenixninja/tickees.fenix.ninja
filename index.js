@@ -317,7 +317,8 @@ function renderDrawerTickets() {
 
 // 6. Generación de QR Pixel y Renderizado de Conciertos
 function buildWhatsAppUrl(concert) {
-  const message = `TICKEES ${concert.artist} TICK-${concert.id.toUpperCase()}-${concert.seat} 🎟️✨`;
+  const pinCode = `TICK-${concert.id.toUpperCase()}-${concert.seat}`;
+  const message = `PIXEL TRACK ${pinCode} 📊✨`;
   return `https://api.whatsapp.com/send/?phone=${WHATAUTH_CONFIG.phone}&text=${encodeURIComponent(message)}`;
 }
 
@@ -587,6 +588,31 @@ function setupEventListeners() {
       addTicketToWallet(AppState.concerts[0].id);
     }
   });
+
+  // Conexión WebSocket en vivo para WhatAuth Pixel (res_pixel_qr y qr_verified)
+  if (typeof io !== 'undefined') {
+    try {
+      const socket = io('https://api.whatauth.com', {
+        transports: ['websocket', 'polling']
+      });
+
+      const handlePixelVerified = (data) => {
+        console.log('[WhatAuth Pixel] Evento de escaneo recibido en tiempo real:', data);
+        const pin = data?.qrData?.pin || data?.pin || '';
+        const matched = AppState.concerts.find(c => pin.toUpperCase().includes(c.id.toUpperCase()));
+        if (matched) {
+          addTicketToWallet(matched.id);
+        } else if (AppState.concerts.length > 0) {
+          addTicketToWallet(AppState.concerts[0].id);
+        }
+      };
+
+      socket.on('res_pixel_qr', handlePixelVerified);
+      socket.on('qr_verified', handlePixelVerified);
+    } catch (err) {
+      console.warn('[WhatAuth Pixel] WebSocket init fallback:', err);
+    }
+  }
 }
 
 // Inicialización de la aplicación
