@@ -691,6 +691,12 @@ h1.logo-title span:last-child {
   display: none !important;
 }
 
+/* Ocultar números/código de barras al pulsar Comprar Entrada y en Compra Realizada */
+.ticket-serial.state-qr-revealed .numbers-wrapper,
+.ticket-serial.state-purchased .numbers-wrapper {
+  display: none !important;
+}
+
 /* Animación de entrada para el QR y el Success Box */
 .ticket-serial.state-qr-revealed .ticket-qr-wrapper,
 .ticket-serial.state-purchased .ticket-success-box {
@@ -789,14 +795,14 @@ h1.logo-title span:last-child {
 }
 
 .ticket-qr-container {
-  width: 146px;
-  height: 146px;
+  width: 198px;
+  height: 198px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #ffffff;
   border-radius: 14px;
-  padding: 6px;
+  padding: 4px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(0, 0, 0, 0.04);
   transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
@@ -858,7 +864,7 @@ h1.logo-title span:last-child {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 270px;
+  max-width: 198px;
   gap: 6px;
   font-size: 0.75rem;
 }
@@ -906,23 +912,56 @@ h1.logo-title span:last-child {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
-  padding: 9px 12px;
+  padding: 12px 18px;
   background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
   color: #ffffff;
   text-decoration: none;
-  font-weight: 700;
-  font-size: 0.85rem;
-  border-radius: 10px;
-  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
-  transition: all 0.2s ease;
+  font-weight: 800;
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   user-select: none;
 }
 
 .btn-scan-wa:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 22px rgba(37, 211, 102, 0.55);
+}
+
+.btn-scan-wa:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ========================================================
+   Modo Adaptativo: Escritorio con QR vs Móvil con Botón Directo
+   ======================================================== */
+@media (min-width: 769px) {
+  /* En escritorio: mostramos el QR grande para escanear y ocultamos el botón directo */
+  .ticket-serial.state-qr-revealed .btn-scan-wa {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* En versión móvil: el usuario no puede escanear su propia pantalla,
+     por lo que se oculta el QR y se muestra directamente el botón Comprar en WhatsApp */
+  .ticket-serial.state-qr-revealed .ticket-qr-container,
+  .ticket-serial.state-qr-revealed .ticket-qr-meta {
+    display: none !important;
+  }
+
+  .ticket-serial.state-qr-revealed .btn-scan-wa {
+    display: flex !important;
+    width: 100%;
+    max-width: 270px;
+    padding: 13px 20px;
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
 }
 
 .numbers-wrapper {

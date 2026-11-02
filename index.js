@@ -474,8 +474,8 @@ function renderQrInContainer(concertId, sessionData) {
 
   if (typeof QRCodeStyling !== 'undefined' && sessionData.walink) {
     const qrCode = new QRCodeStyling({
-      width: 140,
-      height: 140,
+      width: 190,
+      height: 190,
       type: 'svg',
       data: sessionData.walink,
       image: WHATAUTH_CONFIG.logoUrl || undefined,
@@ -502,7 +502,7 @@ function renderQrInContainer(concertId, sessionData) {
     });
     qrCode.append(qrContainer);
   } else if (sessionData.qrDataUrl) {
-    qrContainer.innerHTML = `<img src="${sessionData.qrDataUrl}" alt="QR Ticket" style="width: 140px; height: 140px; object-fit: contain; border-radius: 8px;">`;
+    qrContainer.innerHTML = `<img src="${sessionData.qrDataUrl}" alt="QR Ticket" style="width: 190px; height: 190px; object-fit: contain; border-radius: 8px;">`;
   }
 
   // Actualizar botón Escanear en WhatsApp
@@ -610,7 +610,7 @@ function renderConcerts() {
           </div>
           <div class="ticket-actions">
             <a href="#" target="_blank" rel="noopener noreferrer" class="btn-scan-wa" data-concert-id="${concert.id}">
-              💬 ${t('scanWithWhatsApp')}
+              💬 ${t('buyOnWhatsApp') || t('scanWithWhatsApp')}
             </a>
             <button type="button" class="btn-cancel-qr" data-concert-id="${concert.id}">
               ${t('cancel')}
