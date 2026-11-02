@@ -810,11 +810,47 @@ h1.logo-title span:last-child {
 }
 
 .ticket-qr-container canvas,
-.ticket-qr-container svg {
+.ticket-qr-container svg,
+.ticket-qr-container img {
   display: block;
   width: 100% !important;
   height: 100% !important;
   border-radius: 8px;
+}
+
+/* Spinner de Carga de QR en Vivo */
+.qr-loading-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  text-align: center;
+}
+
+.qr-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(16, 185, 129, 0.2);
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: qrSpin 0.8s linear infinite;
+}
+
+@keyframes qrSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.qr-loading-text {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.02em;
 }
 
 .ticket-qr-meta {

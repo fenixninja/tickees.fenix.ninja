@@ -1,6 +1,8 @@
 // Constantes de Integración WhatAuth (Línea dedicada FNX en WhatAuth Cloud)
 const WHATAUTH_CONFIG = {
   phone: '34627118121',
+  domain: 'tickees.fenix.ninja',
+  wsUrl: 'https://api.whatauth.com',
   logoUrl: 'fenix_icons/apple-icon-60x60.png',
   storageKey: 'tickees_wallet'
 };
@@ -10,7 +12,11 @@ const AppState = {
   currentLang: 'es',
   translations: {},
   concerts: [],
-  wallet: []
+  wallet: [],
+  activeSessions: {},         // sessionId -> concertId
+  activeConcertSessions: {},  // concertId -> { sessionId, walink, qrDataUrl, pin }
+  pendingConcertId: null,
+  socket: null
 };
 
 // 1. Selector e inicializador de idioma (Detección automática + fallback + localStorage)
@@ -350,11 +356,166 @@ function renderDrawerTickets() {
   calculateTotalSpent();
 }
 
-// 6. Generación de QR Pixel y Renderizado de Conciertos
-function buildWhatsAppUrl(concert) {
-  const pinCode = `TICK-${concert.id.toUpperCase()}-${concert.seat}`;
-  const message = `PIXEL TRACK ${pinCode} 📊✨`;
-  return `https://api.whatsapp.com/send/?phone=${WHATAUTH_CONFIG.phone}&text=${encodeURIComponent(message)}`;
+// 6. Conexión WebSocket y Generador de QR Pixel en Vivo
+function getWhatAuthSocket() {
+  if (AppState.socket) return AppState.socket;
+  if (typeof io === 'undefined') {
+    console.warn('[WhatAuth] Socket.io no está disponible');
+    return null;
+  }
+
+  const socket = io(WHATAUTH_CONFIG.wsUrl, {
+    transports: ['websocket', 'polling']
+  });
+
+  socket.on('connect', () => {
+    console.log('[WhatAuth WS] Conectado a', WHATAUTH_CONFIG.wsUrl, 'Socket ID:', socket.id);
+  });
+
+  // 1. Recepción del QR generado por el backend con sesión efímera
+  socket.on('qr_ready', (data) => {
+    console.log('[WhatAuth WS] qr_ready recibido:', data);
+    if (!data || !data.success) {
+      console.error('[WhatAuth WS] Error en qr_ready:', data?.error);
+      return;
+    }
+
+    const concertId = AppState.pendingConcertId || 'c1';
+    const sessionId = data.sessionId;
+
+    if (sessionId) {
+      AppState.activeSessions[sessionId] = concertId;
+    }
+
+    // Ajustar número de teléfono al número configurado (+34627118121) manteniendo intacto el mensaje y la sesión
+    let finalWalink = data.walink || '';
+    if (WHATAUTH_CONFIG.phone && finalWalink) {
+      try {
+        const u = new URL(finalWalink);
+        u.searchParams.set('phone', WHATAUTH_CONFIG.phone);
+        finalWalink = u.toString();
+      } catch (_) {}
+    }
+
+    const sessionData = {
+      sessionId,
+      walink: finalWalink,
+      qrDataUrl: data.qrDataUrl || data.qrBase64 || '',
+      pin: data.pin || `TICK-${concertId.toUpperCase()}`
+    };
+
+    AppState.activeConcertSessions[concertId] = sessionData;
+    renderQrInContainer(concertId, sessionData);
+  });
+
+  // 2. Recepción de confirmación cuando el usuario escanea y envía el WhatsApp
+  const handleScanVerification = (data) => {
+    console.log('[WhatAuth WS] 🎯 ¡Verificación de escaneo recibida en tiempo real!', data);
+    const sessionId = data?.sessionId;
+    const concertId = (sessionId && AppState.activeSessions[sessionId]) || AppState.pendingConcertId || 'c1';
+
+    addTicketToWallet(concertId);
+  };
+
+  socket.on('res_pixel_qr', handleScanVerification);
+  socket.on('qr_verified', handleScanVerification);
+
+  socket.on('disconnect', (reason) => {
+    console.log('[WhatAuth WS] Desconectado:', reason);
+  });
+
+  AppState.socket = socket;
+  return socket;
+}
+
+function requestTicketQr(concertId) {
+  const qrContainer = document.getElementById(`qr-container-${concertId}`);
+  if (!qrContainer) return;
+
+  AppState.pendingConcertId = concertId;
+
+  // Si ya tenemos sesión activa para este concierto, la mostramos
+  const cached = AppState.activeConcertSessions[concertId];
+  if (cached && cached.walink) {
+    renderQrInContainer(concertId, cached);
+    return;
+  }
+
+  // Estado de carga mientras el backend emite qr_ready
+  qrContainer.innerHTML = `
+    <div class="qr-loading-box">
+      <div class="qr-spinner"></div>
+      <span class="qr-loading-text">${t('loadingTicket')}</span>
+    </div>
+  `;
+
+  const socket = getWhatAuthSocket();
+  if (socket && socket.connected) {
+    socket.emit('req_pixel_qr', {
+      domain: WHATAUTH_CONFIG.domain,
+      id: concertId
+    });
+  } else if (socket) {
+    socket.once('connect', () => {
+      socket.emit('req_pixel_qr', {
+        domain: WHATAUTH_CONFIG.domain,
+        id: concertId
+      });
+    });
+  }
+}
+
+function renderQrInContainer(concertId, sessionData) {
+  const qrContainer = document.getElementById(`qr-container-${concertId}`);
+  const serial = document.getElementById(`serial-${concertId}`);
+  if (!qrContainer || !serial) return;
+
+  qrContainer.innerHTML = '';
+
+  if (typeof QRCodeStyling !== 'undefined' && sessionData.walink) {
+    const qrCode = new QRCodeStyling({
+      width: 140,
+      height: 140,
+      type: 'svg',
+      data: sessionData.walink,
+      image: WHATAUTH_CONFIG.logoUrl || undefined,
+      dotsOptions: {
+        color: '#111827',
+        type: 'rounded'
+      },
+      backgroundOptions: {
+        color: '#ffffff'
+      },
+      imageOptions: {
+        crossOrigin: 'anonymous',
+        margin: 2,
+        imageSize: 0.28
+      },
+      cornersSquareOptions: {
+        color: '#0f766e',
+        type: 'extra-rounded'
+      },
+      cornersDotOptions: {
+        color: '#111827',
+        type: 'dot'
+      }
+    });
+    qrCode.append(qrContainer);
+  } else if (sessionData.qrDataUrl) {
+    qrContainer.innerHTML = `<img src="${sessionData.qrDataUrl}" alt="QR Ticket" style="width: 140px; height: 140px; object-fit: contain; border-radius: 8px;">`;
+  }
+
+  // Actualizar botón Escanear en WhatsApp
+  const btnScanWa = serial.querySelector('.btn-scan-wa');
+  if (btnScanWa) {
+    btnScanWa.href = sessionData.walink || '#';
+  }
+
+  // Actualizar PIN badge
+  const pinBadge = serial.querySelector('.qr-pin-badge');
+  if (pinBadge && sessionData.pin) {
+    pinBadge.textContent = sessionData.pin;
+  }
 }
 
 function renderConcerts() {
@@ -366,7 +527,6 @@ function renderConcerts() {
   AppState.concerts.forEach(concert => {
     const calculatedDate = getFutureDate(concert.daysOffset || 3);
     const serialHTML = generateSerialNumbersHTML(concert.serialNumber);
-    const waLink = buildWhatsAppUrl(concert);
     const pinCode = `TICK-${concert.id.toUpperCase()}-${concert.seat}`;
 
     const existingInWallet = AppState.wallet.find(item => item.id === concert.id);
@@ -436,7 +596,10 @@ function renderConcerts() {
         <!-- Estado 2: QR Pixel Desplegado (Oculto inicialmente) -->
         <div class="ticket-qr-wrapper" style="display: none;">
           <div class="ticket-qr-container" id="qr-container-${concert.id}" title="${t('scanWithWhatsApp')}">
-            <!-- QR Pixel generado dinámicamente -->
+            <div class="qr-loading-box">
+              <div class="qr-spinner"></div>
+              <span class="qr-loading-text">${t('loadingTicket')}</span>
+            </div>
           </div>
           <div class="ticket-qr-meta">
             <span class="qr-pin-badge">${pinCode}</span>
@@ -446,7 +609,7 @@ function renderConcerts() {
             </span>
           </div>
           <div class="ticket-actions">
-            <a href="${waLink}" target="_blank" rel="noopener noreferrer" class="btn-scan-wa" data-concert-id="${concert.id}">
+            <a href="#" target="_blank" rel="noopener noreferrer" class="btn-scan-wa" data-concert-id="${concert.id}">
               💬 ${t('scanWithWhatsApp')}
             </a>
             <button type="button" class="btn-cancel-qr" data-concert-id="${concert.id}">
@@ -481,56 +644,16 @@ function renderConcerts() {
     const qrWrapper = ticketCard.querySelector('.ticket-qr-wrapper');
     const successBox = ticketCard.querySelector('.ticket-success-box');
     const btnBuy = ticketCard.querySelector('.btn-buy-ticket');
-    let qrRendered = false;
 
-    // Función auxiliar para renderizar el QR cuando se solicita
-    const ensureQrRendered = () => {
-      if (qrRendered || !qrContainer) return;
-      qrRendered = true;
-
-      if (typeof QRCodeStyling !== 'undefined') {
-        const qrCode = new QRCodeStyling({
-          width: 140,
-          height: 140,
-          type: 'svg',
-          data: waLink,
-          image: WHATAUTH_CONFIG.logoUrl || undefined,
-          dotsOptions: {
-            color: '#111827',
-            type: 'rounded'
-          },
-          backgroundOptions: {
-            color: '#ffffff'
-          },
-          imageOptions: {
-            crossOrigin: 'anonymous',
-            margin: 2,
-            imageSize: 0.28
-          },
-          cornersSquareOptions: {
-            color: '#0f766e',
-            type: 'extra-rounded'
-          },
-          cornersDotOptions: {
-            color: '#111827',
-            type: 'dot'
-          }
-        });
-        qrCode.append(qrContainer);
-      } else {
-        qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(waLink)}" alt="QR Code" style="width: 100%; height: 100%; object-fit: contain;">`;
-      }
-    };
-
-    // 1. Al pulsar "COMPRAR ENTRADA": oculta el botón y revela el QR
+    // 1. Al pulsar "COMPRAR ENTRADA": oculta el botón, revela el QR y solicita la sesión al servidor
     if (btnBuy) {
       btnBuy.addEventListener('click', () => {
-        ensureQrRendered();
         btnBuy.style.display = 'none';
         if (successBox) successBox.style.display = 'none';
         if (qrWrapper) qrWrapper.style.display = 'flex';
         serialEl.classList.remove('state-initial', 'state-purchased');
         serialEl.classList.add('state-qr-revealed');
+        requestTicketQr(concert.id);
       });
     }
 
@@ -546,31 +669,27 @@ function renderConcerts() {
       });
     }
 
-    // 3. Al pulsar "+ Comprar otra entrada": vuelve a mostrar el QR
+    // 3. Al pulsar "+ Comprar otra entrada": genera una nueva sesión y vuelve a mostrar el QR
     const btnBuyAnother = ticketCard.querySelector('.btn-buy-another');
     if (btnBuyAnother) {
       btnBuyAnother.addEventListener('click', () => {
-        ensureQrRendered();
+        delete AppState.activeConcertSessions[concert.id];
         if (btnBuy) btnBuy.style.display = 'none';
         if (successBox) successBox.style.display = 'none';
         if (qrWrapper) qrWrapper.style.display = 'flex';
         serialEl.classList.remove('state-initial', 'state-purchased');
         serialEl.classList.add('state-qr-revealed');
+        requestTicketQr(concert.id);
       });
     }
 
-    // 4. Al hacer click en el QR o en "Escanear en WhatsApp": abre WhatsApp y registra la compra
+    // 4. Al hacer click en el QR o en "Escanear en WhatsApp": abre WhatsApp con el enlace real (la compra la confirma el escaneo)
     if (qrContainer) {
       qrContainer.addEventListener('click', () => {
-        window.open(waLink, '_blank');
-        addTicketToWallet(concert.id);
-      });
-    }
-
-    const btnScanWa = ticketCard.querySelector('.btn-scan-wa');
-    if (btnScanWa) {
-      btnScanWa.addEventListener('click', () => {
-        addTicketToWallet(concert.id);
+        const session = AppState.activeConcertSessions[concert.id];
+        if (session && session.walink) {
+          window.open(session.walink, '_blank');
+        }
       });
     }
   });
@@ -676,46 +795,20 @@ function setupEventListeners() {
     }
   });
 
-  // Listener global de eventos de WhatAuth SDK (cubre eventos DOM emitidos por el SDK)
+  // Inicializar conexión WebSocket de WhatAuth
+  getWhatAuthSocket();
+
+  // Listener global de eventos de WhatAuth SDK (cubre eventos DOM emitidos por el SDK como fallback)
   const onWhatAuthVerified = (e) => {
     console.log('[WhatAuth SDK] Verificación recibida desde SDK:', e.detail);
-    const pin = e.detail?.qrData?.pin || e.detail?.pin || '';
-    const matched = AppState.concerts.find(c => pin && pin.toUpperCase().includes(c.id.toUpperCase()));
-    if (matched) {
-      addTicketToWallet(matched.id);
-    } else if (AppState.concerts.length > 0) {
-      addTicketToWallet(AppState.concerts[0].id);
-    }
+    const sessionId = e.detail?.sessionId;
+    const concertId = (sessionId && AppState.activeSessions[sessionId]) || AppState.pendingConcertId || 'c1';
+    addTicketToWallet(concertId);
   };
 
   window.addEventListener('whatauth:success', onWhatAuthVerified);
   window.addEventListener('whatauth:pixel', onWhatAuthVerified);
   window.addEventListener('whatauth:pixel_verified', onWhatAuthVerified);
-
-  // Conexión WebSocket en vivo para WhatAuth Pixel (res_pixel_qr y qr_verified)
-  if (typeof io !== 'undefined') {
-    try {
-      const socket = io('https://api.whatauth.com', {
-        transports: ['websocket', 'polling']
-      });
-
-      const handlePixelVerified = (data) => {
-        console.log('[WhatAuth Pixel] Evento de escaneo recibido en tiempo real:', data);
-        const pin = data?.qrData?.pin || data?.pin || '';
-        const matched = AppState.concerts.find(c => pin.toUpperCase().includes(c.id.toUpperCase()));
-        if (matched) {
-          addTicketToWallet(matched.id);
-        } else if (AppState.concerts.length > 0) {
-          addTicketToWallet(AppState.concerts[0].id);
-        }
-      };
-
-      socket.on('res_pixel_qr', handlePixelVerified);
-      socket.on('qr_verified', handlePixelVerified);
-    } catch (err) {
-      console.warn('[WhatAuth Pixel] WebSocket init fallback:', err);
-    }
-  }
 }
 
 // Inicialización de la aplicación

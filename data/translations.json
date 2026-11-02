@@ -26,6 +26,7 @@
     "purchaseCompleted": "✓ COMPRA REALIZADA",
     "buyAnotherTicket": "+ Comprar otra entrada",
     "ticketsInWallet": "entradas en tu cartera",
+    "loadingTicket": "Generando Ticket...",
     "cancel": "Volver"
   },
   "en": {
@@ -55,6 +56,7 @@
     "purchaseCompleted": "✓ PURCHASE COMPLETED",
     "buyAnotherTicket": "+ Buy another ticket",
     "ticketsInWallet": "tickets in your wallet",
+    "loadingTicket": "Generating Ticket...",
     "cancel": "Back"
   },
   "de": {
@@ -84,6 +86,7 @@
     "purchaseCompleted": "✓ KAUF ABGESCHLOSSEN",
     "buyAnotherTicket": "+ Ein weiteres Ticket kaufen",
     "ticketsInWallet": "Tickets in deiner Wallet",
+    "loadingTicket": "Ticket wird erstellt...",
     "cancel": "Zurück"
   },
   "fr": {
@@ -113,6 +116,7 @@
     "purchaseCompleted": "✓ ACHAT EFFECTUÉ",
     "buyAnotherTicket": "+ Acheter un autre billet",
     "ticketsInWallet": "billets dans votre portefeuille",
+    "loadingTicket": "Génération du billet...",
     "cancel": "Retour"
   },
   "hi": {
@@ -142,6 +146,7 @@
     "purchaseCompleted": "✓ खरीदारी पूरी हुई",
     "buyAnotherTicket": "+ एक और टिकट खरीदें",
     "ticketsInWallet": "टिकट आपके वॉलेट में",
+    "loadingTicket": "टिकट जनरेट हो रहा है...",
     "cancel": "वापस"
   },
   "zh": {
@@ -171,6 +176,7 @@
     "purchaseCompleted": "✓ 购票成功",
     "buyAnotherTicket": "+ 再次购买门票",
     "ticketsInWallet": "张门票在您的卡包中",
+    "loadingTicket": "正在生成门票...",
     "cancel": "返回"
   },
   "ja": {
@@ -200,6 +206,7 @@
     "purchaseCompleted": "✓ 購入完了",
     "buyAnotherTicket": "+ もう1枚購入する",
     "ticketsInWallet": "枚のチケットがウォレットにあります",
+    "loadingTicket": "チケットを生成中...",
     "cancel": "戻る"
   }
 }
