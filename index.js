@@ -1,7 +1,7 @@
 // Constantes de Integración WhatAuth (Línea dedicada FNX en WhatAuth Cloud)
 const WHATAUTH_CONFIG = {
   phone: '34627118121',
-  logoUrl: 'img/whatauth-logo.png',
+  logoUrl: 'fenix_icons/apple-icon-60x60.png',
   storageKey: 'tickees_wallet'
 };
 
@@ -154,16 +154,25 @@ function updateTicketCardState(concertId) {
 
   const existing = AppState.wallet.find(item => item.id === concertId);
   const unitsCountEl = serial.querySelector('.success-units-count');
+  const btnBuy = serial.querySelector('.btn-buy-ticket');
+  const qrWrapper = serial.querySelector('.ticket-qr-wrapper');
+  const successBox = serial.querySelector('.ticket-success-box');
 
   if (existing && existing.units > 0) {
     serial.classList.remove('state-initial', 'state-qr-revealed');
     serial.classList.add('state-purchased');
+    if (btnBuy) btnBuy.style.display = 'none';
+    if (qrWrapper) qrWrapper.style.display = 'none';
+    if (successBox) successBox.style.display = 'flex';
     if (unitsCountEl) {
       unitsCountEl.textContent = `${existing.units} ${t('ticketsInWallet')}`;
     }
   } else {
     serial.classList.remove('state-purchased', 'state-qr-revealed');
     serial.classList.add('state-initial');
+    if (btnBuy) btnBuy.style.display = 'flex';
+    if (qrWrapper) qrWrapper.style.display = 'none';
+    if (successBox) successBox.style.display = 'none';
   }
 }
 
@@ -420,20 +429,20 @@ function renderConcerts() {
       <!-- Zona de acción y QR Pixel de WhatAuth con 3 estados fluidos -->
       <div class="ticket-serial ${initialStateClass}" id="serial-${concert.id}">
         <!-- Estado 1: Botón Inicial Comprar Entrada -->
-        <button type="button" class="btn-buy-ticket" data-concert-id="${concert.id}">
+        <button type="button" class="btn-buy-ticket" data-concert-id="${concert.id}" style="${hasPurchased ? 'display: none;' : 'display: flex;'}">
           <span>🎟️</span> <span>${t('buyTicket')}</span>
         </button>
 
-        <!-- Estado 2: QR Pixel Desplegado -->
-        <div class="ticket-qr-wrapper">
+        <!-- Estado 2: QR Pixel Desplegado (Oculto inicialmente) -->
+        <div class="ticket-qr-wrapper" style="display: none;">
           <div class="ticket-qr-container" id="qr-container-${concert.id}" title="${t('scanWithWhatsApp')}">
             <!-- QR Pixel generado dinámicamente -->
           </div>
           <div class="ticket-qr-meta">
             <span class="qr-pin-badge">${pinCode}</span>
             <span class="qr-whatauth-badge">
-              <img src="${WHATAUTH_CONFIG.logoUrl}" alt="WhatAuth" class="whatauth-mini-icon">
-              WhatAuth Pixel
+              <span>🎟️</span>
+              <span>Ticket Pixel</span>
             </span>
           </div>
           <div class="ticket-actions">
@@ -447,7 +456,7 @@ function renderConcerts() {
         </div>
 
         <!-- Estado 3: Compra Realizada / En Cartera -->
-        <div class="ticket-success-box">
+        <div class="ticket-success-box" style="${hasPurchased ? 'display: flex;' : 'display: none;'}">
           <div class="success-badge-title">
             <span>✓</span> <span>${t('purchaseCompleted')}</span>
           </div>
@@ -469,6 +478,9 @@ function renderConcerts() {
 
     const serialEl = ticketCard.querySelector(`#serial-${concert.id}`);
     const qrContainer = ticketCard.querySelector(`#qr-container-${concert.id}`);
+    const qrWrapper = ticketCard.querySelector('.ticket-qr-wrapper');
+    const successBox = ticketCard.querySelector('.ticket-success-box');
+    const btnBuy = ticketCard.querySelector('.btn-buy-ticket');
     let qrRendered = false;
 
     // Función auxiliar para renderizar el QR cuando se solicita
@@ -482,7 +494,7 @@ function renderConcerts() {
           height: 140,
           type: 'svg',
           data: waLink,
-          image: WHATAUTH_CONFIG.logoUrl,
+          image: WHATAUTH_CONFIG.logoUrl || undefined,
           dotsOptions: {
             color: '#111827',
             type: 'rounded'
@@ -492,8 +504,8 @@ function renderConcerts() {
           },
           imageOptions: {
             crossOrigin: 'anonymous',
-            margin: 3,
-            imageSize: 0.32
+            margin: 2,
+            imageSize: 0.28
           },
           cornersSquareOptions: {
             color: '#0f766e',
@@ -511,10 +523,12 @@ function renderConcerts() {
     };
 
     // 1. Al pulsar "COMPRAR ENTRADA": oculta el botón y revela el QR
-    const btnBuy = ticketCard.querySelector('.btn-buy-ticket');
     if (btnBuy) {
       btnBuy.addEventListener('click', () => {
         ensureQrRendered();
+        btnBuy.style.display = 'none';
+        if (successBox) successBox.style.display = 'none';
+        if (qrWrapper) qrWrapper.style.display = 'flex';
         serialEl.classList.remove('state-initial', 'state-purchased');
         serialEl.classList.add('state-qr-revealed');
       });
@@ -524,6 +538,9 @@ function renderConcerts() {
     const btnCancel = ticketCard.querySelector('.btn-cancel-qr');
     if (btnCancel) {
       btnCancel.addEventListener('click', () => {
+        if (qrWrapper) qrWrapper.style.display = 'none';
+        if (successBox) successBox.style.display = 'none';
+        if (btnBuy) btnBuy.style.display = 'flex';
         serialEl.classList.remove('state-qr-revealed', 'state-purchased');
         serialEl.classList.add('state-initial');
       });
@@ -534,6 +551,9 @@ function renderConcerts() {
     if (btnBuyAnother) {
       btnBuyAnother.addEventListener('click', () => {
         ensureQrRendered();
+        if (btnBuy) btnBuy.style.display = 'none';
+        if (successBox) successBox.style.display = 'none';
+        if (qrWrapper) qrWrapper.style.display = 'flex';
         serialEl.classList.remove('state-initial', 'state-purchased');
         serialEl.classList.add('state-qr-revealed');
       });
