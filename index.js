@@ -581,13 +581,21 @@ function setupEventListeners() {
     }
   });
 
-  // Listener global de eventos de WhatAuth SDK
-  window.addEventListener('whatauth:success', (e) => {
-    console.log('[WhatAuth SDK] Verificación exitosa detectada:', e.detail);
-    if (AppState.concerts.length > 0) {
+  // Listener global de eventos de WhatAuth SDK (cubre eventos DOM emitidos por el SDK)
+  const onWhatAuthVerified = (e) => {
+    console.log('[WhatAuth SDK] Verificación recibida desde SDK:', e.detail);
+    const pin = e.detail?.qrData?.pin || e.detail?.pin || '';
+    const matched = AppState.concerts.find(c => pin && pin.toUpperCase().includes(c.id.toUpperCase()));
+    if (matched) {
+      addTicketToWallet(matched.id);
+    } else if (AppState.concerts.length > 0) {
       addTicketToWallet(AppState.concerts[0].id);
     }
-  });
+  };
+
+  window.addEventListener('whatauth:success', onWhatAuthVerified);
+  window.addEventListener('whatauth:pixel', onWhatAuthVerified);
+  window.addEventListener('whatauth:pixel_verified', onWhatAuthVerified);
 
   // Conexión WebSocket en vivo para WhatAuth Pixel (res_pixel_qr y qr_verified)
   if (typeof io !== 'undefined') {
