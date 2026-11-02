@@ -90,10 +90,65 @@ body {
   min-width: 0; /* Para evitar overflow de flexbox */
 }
 
+/* Header Right: Botón Mis Entradas + Selector de Idioma */
 .header-right {
   display: flex;
   align-items: center;
+  gap: 0.75rem;
   flex-shrink: 0;
+}
+
+/* Botón Mis Entradas en Header */
+.btn-my-tickets {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08));
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  padding: 0.48rem 1rem;
+  border-radius: 9999px;
+  color: #ffffff;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  transition: all 0.25s ease;
+  user-select: none;
+}
+
+.btn-my-tickets:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.15));
+  border-color: var(--aurora-teal);
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(15, 225, 183, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-my-tickets-icon {
+  font-size: 1.1rem;
+}
+
+.badge-tickets-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #ff0055, #ff5400);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(255, 0, 85, 0.5);
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.badge-tickets-count.bump {
+  transform: scale(1.4);
 }
 
 /* Estilos de la Announcement Bar temática de conciertos */
@@ -578,35 +633,153 @@ h1.logo-title span:last-child {
   right: -18px;
 }
 
-/* Sección Serial y Código de Barras */
+/* Sección Serial y QR Pixel WhatAuth */
 .ticket-serial {
-  padding: 8px 24px 22px 24px;
+  padding: 14px 20px 22px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 12px;
+  background: #ffffff;
 }
 
-.barcode-wrapper {
-  width: 100%;
+.ticket-qr-wrapper {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.ticket-qr-container {
+  width: 146px;
+  height: 146px;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  position: relative;
   overflow: hidden;
 }
 
-.barcode-table {
-  border-collapse: collapse;
-  margin: 0 auto;
+.ticket-qr-container:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.22), inset 0 0 0 1.5px rgba(37, 211, 102, 0.4);
 }
 
-.barcode-table td {
-  width: 2px;
-  height: 45px;
-  padding: 0;
+.ticket-qr-container canvas,
+.ticket-qr-container svg {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 8px;
+}
+
+.ticket-qr-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 270px;
+  gap: 6px;
+  font-size: 0.75rem;
+}
+
+.qr-pin-badge {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #334155;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  border: 1px solid #e2e8f0;
+}
+
+.qr-whatauth-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  font-size: 0.72rem;
+  color: #0f766e;
+  background: #ccfbf1;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(15, 118, 110, 0.2);
+}
+
+.whatauth-mini-icon {
+  width: 13px;
+  height: 13px;
+  object-fit: contain;
+}
+
+.ticket-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 270px;
+}
+
+.btn-scan-wa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 9px 12px;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.btn-scan-wa:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+}
+
+.btn-simulate-scan {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 7px 12px;
+  background: #f8fafc;
+  color: #475569;
+  border: 1.5px dashed #cbd5e1;
+  font-weight: 600;
+  font-size: 0.78rem;
+  font-family: "Outfit", sans-serif;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-simulate-scan:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: var(--aurora-teal);
+  border-style: solid;
+  transform: translateY(-1px);
 }
 
 .numbers-wrapper {
   width: 100%;
-  margin-top: 6px;
+  margin-top: 2px;
 }
 
 .numbers-table {
@@ -617,12 +790,408 @@ h1.logo-title span:last-child {
 }
 
 .numbers-table td {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-family: monospace;
   font-weight: 600;
   text-align: center;
-  color: #4a5568;
+  color: #64748b;
   letter-spacing: 1px;
+}
+
+/* ========================================================
+   Drawer de Mis Entradas (Wallet de Tickets)
+   ======================================================== */
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 2, 20, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.drawer-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tickets-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  max-width: 440px;
+  height: 100vh;
+  background: #180928;
+  border-left: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #ffffff;
+}
+
+.tickets-drawer.active {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.drawer-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.drawer-icon {
+  font-size: 1.4rem;
+}
+
+.drawer-title-group h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-family: "Outfit", sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+.drawer-total-badge {
+  background: var(--aurora-teal);
+  color: #120324;
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+}
+
+.btn-close-drawer {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 1.6rem;
+  line-height: 1;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-close-drawer:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(90deg);
+}
+
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.drawer-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 100%;
+  padding: 2rem 1.5rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.drawer-empty-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.drawer-empty-state p {
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Tarjetas de tickets en el Drawer */
+.wallet-ticket-card {
+  background: #ffffff;
+  color: #1f2937;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.wallet-card-header {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: #fafafa;
+  border-bottom: 1.5px dashed #e5e7eb;
+  position: relative;
+}
+
+/* Troquelado lateral en las tarjetas del wallet */
+.wallet-card-header::before,
+.wallet-card-header::after {
+  content: "";
+  position: absolute;
+  bottom: -9px;
+  width: 16px;
+  height: 16px;
+  background-color: #180928;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.wallet-card-header::before {
+  left: -8px;
+}
+
+.wallet-card-header::after {
+  right: -8px;
+}
+
+.wallet-poster-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.wallet-card-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.wallet-card-artist {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wallet-card-tour {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.wallet-card-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.wallet-chip-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: #ccfbf1;
+  color: #0f766e;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.wallet-card-body {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wallet-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: #f8fafc;
+  padding: 8px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.wallet-info-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.wallet-info-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.wallet-info-val {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.wallet-pricing-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid #f1f5f9;
+}
+
+/* Selector de unidades en cada tarjeta */
+.units-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 2px 4px;
+}
+
+.btn-unit-step {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-unit-step:hover {
+  background: var(--aurora-teal);
+  color: #120324;
+  border-color: var(--aurora-teal);
+}
+
+.unit-count-display {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #0f172a;
+  min-width: 28px;
+  text-align: center;
+}
+
+.wallet-total-for-ticket {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #047857;
+}
+
+.drawer-footer {
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.drawer-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.1rem;
+}
+
+.drawer-summary strong {
+  font-size: 1.4rem;
+  color: var(--aurora-teal);
+  font-weight: 800;
+}
+
+.drawer-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-clear-wallet {
+  flex: 1;
+  padding: 10px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 10px;
+  font-family: "Outfit", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-clear-wallet:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #ffffff;
+}
+
+/* ========================================================
+   Toast Notification
+   ======================================================== */
+.toast-notification {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  padding: 12px 18px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(16, 185, 129, 0.5);
+  font-family: "Outfit", sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(-20px) scale(0.9);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.toast-notification.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
 }
 
 /* Footer */

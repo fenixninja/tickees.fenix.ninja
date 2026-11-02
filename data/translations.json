@@ -12,7 +12,17 @@
     "liveNow": "EN VIVO",
     "tourPromo": "GIRA EN VIVO",
     "ticketsAvailable": "ENTRADAS DISPONIBLES",
-    "fromPrice": "DESDE"
+    "fromPrice": "DESDE",
+    "myTickets": "Mis Entradas",
+    "emptyTickets": "Aún no tienes entradas. ¡Escanea el código QR de un concierto para añadirla!",
+    "scanWithWhatsApp": "Escanear en WhatsApp",
+    "simulateScan": "Simular Escaneo",
+    "ticketAdded": "¡Entrada añadida a tu cartera!",
+    "totalSpent": "Total:",
+    "clearTickets": "Vaciar Cartera",
+    "units": "entradas",
+    "verifiedBy": "WhatAuth Pixel Verificado",
+    "ticketCode": "Código"
   },
   "en": {
     "appTitle": "TICKEES",
@@ -27,7 +37,17 @@
     "liveNow": "LIVE NOW",
     "tourPromo": "LIVE TOUR",
     "ticketsAvailable": "TICKETS AVAILABLE",
-    "fromPrice": "FROM"
+    "fromPrice": "FROM",
+    "myTickets": "My Tickets",
+    "emptyTickets": "No tickets yet. Scan a concert QR code to add one!",
+    "scanWithWhatsApp": "Scan on WhatsApp",
+    "simulateScan": "Simulate Scan",
+    "ticketAdded": "Ticket added to your wallet!",
+    "totalSpent": "Total:",
+    "clearTickets": "Clear Wallet",
+    "units": "tickets",
+    "verifiedBy": "WhatAuth Verified Pixel",
+    "ticketCode": "Code"
   },
   "de": {
     "appTitle": "TICKEES",
@@ -42,7 +62,17 @@
     "liveNow": "LIVE",
     "tourPromo": "LIVE TOURNEE",
     "ticketsAvailable": "TICKETS VERFÜGBAR",
-    "fromPrice": "AB"
+    "fromPrice": "AB",
+    "myTickets": "Meine Tickets",
+    "emptyTickets": "Noch keine Tickets. Scanne einen Konzert-QR-Code, um eins hinzuzufügen!",
+    "scanWithWhatsApp": "In WhatsApp scannen",
+    "simulateScan": "Scan simulieren",
+    "ticketAdded": "Ticket zur Wallet hinzugefügt!",
+    "totalSpent": "Gesamt:",
+    "clearTickets": "Wallet leeren",
+    "units": "Tickets",
+    "verifiedBy": "WhatAuth Verifiziert",
+    "ticketCode": "Code"
   },
   "fr": {
     "appTitle": "TICKEES",
@@ -57,7 +87,17 @@
     "liveNow": "EN DIRECT",
     "tourPromo": "TOURNÉE EN DIRECT",
     "ticketsAvailable": "BILLETS DISPONIBLES",
-    "fromPrice": "DÈS"
+    "fromPrice": "DÈS",
+    "myTickets": "Mes Billets",
+    "emptyTickets": "Aucun billet pour le moment. Scannez le QR code d'un concert pour en ajouter !",
+    "scanWithWhatsApp": "Scanner sur WhatsApp",
+    "simulateScan": "Simuler le scan",
+    "ticketAdded": "Billet ajouté à votre portefeuille !",
+    "totalSpent": "Total :",
+    "clearTickets": "Vider le portefeuille",
+    "units": "billets",
+    "verifiedBy": "Pixel WhatAuth Vérifié",
+    "ticketCode": "Code"
   },
   "hi": {
     "appTitle": "TICKEES",
@@ -72,7 +112,17 @@
     "liveNow": "लाइव",
     "tourPromo": "लाइव टूर",
     "ticketsAvailable": "टिकट उपलब्ध हैं",
-    "fromPrice": "न्यूनतम"
+    "fromPrice": "न्यूनतम",
+    "myTickets": "मेरे टिकट",
+    "emptyTickets": "अभी कोई टिकट नहीं है। टिकट जोड़ने के लिए किसी कॉन्सर्ट का QR कोड स्कैन करें!",
+    "scanWithWhatsApp": "व्हाट्सएप पर स्कैन करें",
+    "simulateScan": "स्कैन का अनुकरण करें",
+    "ticketAdded": "टिकट आपके वॉलेट में जोड़ा गया!",
+    "totalSpent": "कुल:",
+    "clearTickets": "वॉलेट खाली करें",
+    "units": "टिकट",
+    "verifiedBy": "WhatAuth सत्यापित पिक्सेल",
+    "ticketCode": "कोड"
   },
   "zh": {
     "appTitle": "TICKEES",
@@ -87,7 +137,17 @@
     "liveNow": "现场巡演",
     "tourPromo": "巡回演出",
     "ticketsAvailable": "门票热售中",
-    "fromPrice": "起价"
+    "fromPrice": "起价",
+    "myTickets": "我的门票",
+    "emptyTickets": "暂无门票。扫描演唱会 QR 码即可添加！",
+    "scanWithWhatsApp": "在 WhatsApp 上扫描",
+    "simulateScan": "模拟扫描",
+    "ticketAdded": "门票已存入卡包！",
+    "totalSpent": "总计：",
+    "clearTickets": "清空卡包",
+    "units": "张门票",
+    "verifiedBy": "WhatAuth 验证像素",
+    "ticketCode": "验证码"
   },
   "ja": {
     "appTitle": "TICKEES",
@@ -102,6 +162,16 @@
     "liveNow": "ライブ開催中",
     "tourPromo": "ライブツアー",
     "ticketsAvailable": "チケット販売中",
-    "fromPrice": "から"
+    "fromPrice": "から",
+    "myTickets": "マイチケット",
+    "emptyTickets": "まだチケットがありません。コンサートのQRコードをスキャンして追加してください！",
+    "scanWithWhatsApp": "WhatsAppでスキャン",
+    "simulateScan": "スキャンをシミュレート",
+    "ticketAdded": "チケットが追加されました！",
+    "totalSpent": "合計：",
+    "clearTickets": "ウォレットをクリア",
+    "units": "枚",
+    "verifiedBy": "WhatAuth 認証ピクセル",
+    "ticketCode": "コード"
   }
 }

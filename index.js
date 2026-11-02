@@ -1,8 +1,16 @@
+// Constantes de Integración WhatAuth
+const WHATAUTH_CONFIG = {
+  phone: '34631490990',
+  logoUrl: 'img/whatauth-logo.png',
+  storageKey: 'tickees_wallet'
+};
+
 // Estado global de la aplicación
 const AppState = {
   currentLang: 'es',
   translations: {},
-  concerts: []
+  concerts: [],
+  wallet: []
 };
 
 // 1. Selector e inicializador de idioma (Detección automática + fallback + localStorage)
@@ -34,12 +42,15 @@ async function initI18n() {
       setLanguage(e.target.value);
     });
   }
+
+  updateStaticTranslations();
 }
 
 function setLanguage(lang) {
   if (AppState.translations[lang]) {
     AppState.currentLang = lang;
     localStorage.setItem('tickees_lang', lang);
+    updateStaticTranslations();
     renderApp();
   }
 }
@@ -48,29 +59,32 @@ function t(key) {
   return AppState.translations[AppState.currentLang]?.[key] || AppState.translations['es']?.[key] || key;
 }
 
+function updateStaticTranslations() {
+  const lblMyTickets = document.getElementById('lblMyTickets');
+  if (lblMyTickets) lblMyTickets.textContent = t('myTickets');
+
+  const drawerTitle = document.getElementById('drawerTitle');
+  if (drawerTitle) drawerTitle.textContent = t('myTickets');
+
+  const lblTotalSpent = document.getElementById('lblTotalSpent');
+  if (lblTotalSpent) lblTotalSpent.textContent = t('totalSpent');
+
+  const btnClearTickets = document.getElementById('btnClearTickets');
+  if (btnClearTickets) btnClearTickets.textContent = t('clearTickets');
+}
+
 // 2. Motor de Fechas Automáticas (Siempre posteriores al día en que se abre la web)
 function getFutureDate(daysOffset = 3) {
   const now = new Date();
   const future = new Date(now);
   future.setDate(now.getDate() + Math.max(1, daysOffset));
 
-  // Formatear según el idioma actual
   const options = { year: '2-digit', month: '2-digit', day: '2-digit' };
   try {
     return new Intl.DateTimeFormat(AppState.currentLang, options).format(future);
   } catch (e) {
     return `${future.getDate()}/${future.getMonth() + 1}/${String(future.getFullYear()).slice(-2)}`;
   }
-}
-
-// 3. Renderizado del código de barras
-function generateBarcodeHTML(binaryCode) {
-  let cells = '';
-  for (let i = 0; i < binaryCode.length; i++) {
-    const bg = binaryCode[i] === '1' ? '#000000' : '#ffffff';
-    cells += `<td style="background-color: ${bg};"></td>`;
-  }
-  return `<table class="barcode-table"><tr>${cells}</tr></table>`;
 }
 
 // Renderizado de números seriales
@@ -80,7 +94,233 @@ function generateSerialNumbersHTML(serialNumber) {
   return `<table class="numbers-table"><tr>${cells}</tr></table>`;
 }
 
-// 4. Renderizado de las tarjetas de conciertos en el contenedor
+// 3. Gestor de Cartera / Wallet en localStorage
+function loadWallet() {
+  try {
+    const raw = localStorage.getItem(WHATAUTH_CONFIG.storageKey);
+    AppState.wallet = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(AppState.wallet)) AppState.wallet = [];
+  } catch (e) {
+    console.warn('Error leyendo wallet de localStorage:', e);
+    AppState.wallet = [];
+  }
+  updateBadgeCount();
+}
+
+function saveWallet() {
+  try {
+    localStorage.setItem(WHATAUTH_CONFIG.storageKey, JSON.stringify(AppState.wallet));
+  } catch (e) {
+    console.error('Error guardando wallet en localStorage:', e);
+  }
+  updateBadgeCount();
+}
+
+function getTotalUnits() {
+  return AppState.wallet.reduce((sum, item) => sum + (item.units || 1), 0);
+}
+
+function updateBadgeCount(animate = false) {
+  const total = getTotalUnits();
+  const badgeHeader = document.getElementById('badgeMyTickets');
+  const badgeDrawer = document.getElementById('drawerBadgeTotal');
+
+  if (badgeHeader) {
+    badgeHeader.textContent = total;
+    if (animate) {
+      badgeHeader.classList.add('bump');
+      setTimeout(() => badgeHeader.classList.remove('bump'), 300);
+    }
+  }
+
+  if (badgeDrawer) {
+    badgeDrawer.textContent = `${total} ${t('units')}`;
+  }
+
+  calculateTotalSpent();
+}
+
+function calculateTotalSpent() {
+  const total = AppState.wallet.reduce((sum, item) => sum + (item.price * (item.units || 1)), 0);
+  const elTotal = document.getElementById('drawerTotalPrice');
+  if (elTotal) {
+    elTotal.textContent = `${total.toFixed(2)} €`;
+  }
+}
+
+function addTicketToWallet(concertId) {
+  const concert = AppState.concerts.find(c => c.id === concertId);
+  if (!concert) return;
+
+  const calculatedDate = getFutureDate(concert.daysOffset || 3);
+  const existing = AppState.wallet.find(item => item.id === concertId);
+
+  if (existing) {
+    existing.units = (existing.units || 1) + 1;
+    existing.updatedAt = Date.now();
+  } else {
+    AppState.wallet.unshift({
+      id: concert.id,
+      artist: concert.artist,
+      tour: concert.tour,
+      poster: concert.poster,
+      screen: concert.screen,
+      row: concert.row,
+      seat: concert.seat,
+      price: concert.price,
+      currency: concert.currency || '€',
+      time: concert.time,
+      date: calculatedDate,
+      units: 1,
+      ticketCode: `TICK-${concert.id.toUpperCase()}-${concert.seat}`,
+      addedAt: Date.now()
+    });
+  }
+
+  saveWallet();
+  showToast(`🎟️ ${t('ticketAdded')} — ${concert.artist} (${existing ? existing.units : 1}x)`);
+  renderDrawerTickets();
+}
+
+function changeUnits(concertId, delta) {
+  const idx = AppState.wallet.findIndex(item => item.id === concertId);
+  if (idx === -1) return;
+
+  const item = AppState.wallet[idx];
+  item.units = (item.units || 1) + delta;
+
+  if (item.units <= 0) {
+    AppState.wallet.splice(idx, 1);
+  }
+
+  saveWallet();
+  renderDrawerTickets();
+}
+
+function clearWallet() {
+  AppState.wallet = [];
+  saveWallet();
+  renderDrawerTickets();
+  showToast(`🗑️ ${t('clearTickets')}`);
+}
+
+// 4. Toast de notificación flotante
+let toastTimer = null;
+function showToast(message) {
+  const toast = document.getElementById('toastNotification');
+  if (!toast) return;
+
+  toast.textContent = message;
+  toast.classList.add('active');
+
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('active');
+  }, 2800);
+}
+
+// 5. Drawer de Mis Entradas
+function toggleDrawer(open) {
+  const drawer = document.getElementById('ticketsDrawer');
+  const overlay = document.getElementById('ticketsDrawerOverlay');
+  if (!drawer || !overlay) return;
+
+  const shouldOpen = open !== undefined ? open : !drawer.classList.contains('active');
+
+  if (shouldOpen) {
+    renderDrawerTickets();
+    drawer.classList.add('active');
+    overlay.classList.add('active');
+    drawer.setAttribute('aria-hidden', 'false');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  } else {
+    drawer.classList.remove('active');
+    overlay.classList.remove('active');
+    drawer.setAttribute('aria-hidden', 'true');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+}
+
+function renderDrawerTickets() {
+  const container = document.getElementById('drawerTicketsList');
+  if (!container) return;
+
+  if (!AppState.wallet || AppState.wallet.length === 0) {
+    container.innerHTML = `
+      <div class="drawer-empty-state">
+        <span class="drawer-empty-icon">🎟️</span>
+        <p>${t('emptyTickets')}</p>
+      </div>
+    `;
+    calculateTotalSpent();
+    return;
+  }
+
+  container.innerHTML = AppState.wallet.map(ticket => {
+    const totalForTicket = (ticket.price * ticket.units).toFixed(2);
+    return `
+      <article class="wallet-ticket-card">
+        <div class="wallet-card-header">
+          <img src="${ticket.poster}" alt="${ticket.artist}" class="wallet-poster-thumb" />
+          <div class="wallet-card-details">
+            <h3 class="wallet-card-artist">${ticket.artist}</h3>
+            <div class="wallet-card-tour">${ticket.tour}</div>
+            <div class="wallet-card-badge-row">
+              <span class="wallet-chip-verified">✓ ${t('verifiedBy')}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wallet-card-body">
+          <div class="wallet-info-grid">
+            <div class="wallet-info-cell">
+              <span class="wallet-info-label">${t('screen')}</span>
+              <span class="wallet-info-val">${ticket.screen}</span>
+            </div>
+            <div class="wallet-info-cell">
+              <span class="wallet-info-label">${t('row')}</span>
+              <span class="wallet-info-val">${ticket.row}</span>
+            </div>
+            <div class="wallet-info-cell">
+              <span class="wallet-info-label">${t('seat')}</span>
+              <span class="wallet-info-val">${ticket.seat}</span>
+            </div>
+          </div>
+
+          <div class="wallet-pricing-row">
+            <div class="units-stepper">
+              <button type="button" class="btn-unit-step btn-step-down" data-id="${ticket.id}" aria-label="Reducir">–</button>
+              <span class="unit-count-display">${ticket.units}x</span>
+              <button type="button" class="btn-unit-step btn-step-up" data-id="${ticket.id}" aria-label="Aumentar">+</button>
+            </div>
+            <div class="wallet-total-for-ticket">
+              ${totalForTicket} ${ticket.currency}
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join('');
+
+  // Event listeners para los botones de stepper
+  container.querySelectorAll('.btn-step-down').forEach(btn => {
+    btn.addEventListener('click', () => changeUnits(btn.dataset.id, -1));
+  });
+  container.querySelectorAll('.btn-step-up').forEach(btn => {
+    btn.addEventListener('click', () => changeUnits(btn.dataset.id, 1));
+  });
+
+  calculateTotalSpent();
+}
+
+// 6. Generación de QR Pixel y Renderizado de Conciertos
+function buildWhatsAppUrl(concert) {
+  const message = `TICKEES ${concert.artist} TICK-${concert.id.toUpperCase()}-${concert.seat} 🎟️✨`;
+  return `https://api.whatsapp.com/send/?phone=${WHATAUTH_CONFIG.phone}&text=${encodeURIComponent(message)}`;
+}
+
 function renderConcerts() {
   const container = document.getElementById('concertsContainer');
   if (!container) return;
@@ -89,8 +329,9 @@ function renderConcerts() {
 
   AppState.concerts.forEach(concert => {
     const calculatedDate = getFutureDate(concert.daysOffset || 3);
-    const barcodeHTML = generateBarcodeHTML(concert.barcode);
     const serialHTML = generateSerialNumbersHTML(concert.serialNumber);
+    const waLink = buildWhatsAppUrl(concert);
+    const pinCode = `TICK-${concert.id.toUpperCase()}-${concert.seat}`;
 
     const ticketCard = document.createElement('article');
     ticketCard.className = 'ticket-card';
@@ -144,10 +385,30 @@ function renderConcerts() {
 
       <div class="ticket-holes-lower"></div>
 
+      <!-- Sustitución del código de barras por el QR Pixel de WhatAuth -->
       <div class="ticket-serial">
-        <div class="barcode-wrapper">
-          ${barcodeHTML}
+        <div class="ticket-qr-wrapper">
+          <div class="ticket-qr-container" id="qr-container-${concert.id}" title="${t('scanWithWhatsApp')}">
+            <!-- QR Pixel SVG/Canvas generado dinámicamente -->
+          </div>
+          <div class="ticket-qr-meta">
+            <span class="qr-pin-badge">${pinCode}</span>
+            <span class="qr-whatauth-badge">
+              <img src="${WHATAUTH_CONFIG.logoUrl}" alt="WhatAuth" class="whatauth-mini-icon">
+              WhatAuth Pixel
+            </span>
+          </div>
         </div>
+
+        <div class="ticket-actions">
+          <a href="${waLink}" target="_blank" rel="noopener noreferrer" class="btn-scan-wa" data-concert-id="${concert.id}">
+            💬 ${t('scanWithWhatsApp')}
+          </a>
+          <button type="button" class="btn-simulate-scan" data-concert-id="${concert.id}">
+            ⚡ ${t('simulateScan')}
+          </button>
+        </div>
+
         <div class="numbers-wrapper">
           ${serialHTML}
         </div>
@@ -155,10 +416,71 @@ function renderConcerts() {
     `;
 
     container.appendChild(ticketCard);
+
+    // Generar el QR Pixel estilizado con QRCodeStyling
+    const qrContainer = ticketCard.querySelector(`#qr-container-${concert.id}`);
+    if (qrContainer) {
+      if (typeof QRCodeStyling !== 'undefined') {
+        const qrCode = new QRCodeStyling({
+          width: 140,
+          height: 140,
+          type: 'svg',
+          data: waLink,
+          image: WHATAUTH_CONFIG.logoUrl,
+          dotsOptions: {
+            color: '#111827',
+            type: 'rounded'
+          },
+          backgroundOptions: {
+            color: '#ffffff'
+          },
+          imageOptions: {
+            crossOrigin: 'anonymous',
+            margin: 3,
+            imageSize: 0.32
+          },
+          cornersSquareOptions: {
+            color: '#0f766e',
+            type: 'extra-rounded'
+          },
+          cornersDotOptions: {
+            color: '#111827',
+            type: 'dot'
+          }
+        });
+        qrCode.append(qrContainer);
+      } else {
+        // Fallback visual si el script aún no ha cargado
+        qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(waLink)}" alt="QR Code" style="width: 100%; height: 100%; object-fit: contain;">`;
+      }
+
+      // Al hacer click en el QR contenedor: abre WhatsApp y añade al wallet
+      qrContainer.addEventListener('click', () => {
+        window.open(waLink, '_blank');
+        addTicketToWallet(concert.id);
+      });
+    }
+
+    // Botón oficial de Escanear en WhatsApp
+    const btnScanWa = ticketCard.querySelector('.btn-scan-wa');
+    if (btnScanWa) {
+      btnScanWa.addEventListener('click', () => {
+        addTicketToWallet(concert.id);
+      });
+    }
+
+    // Botón de Simular Escaneo Instantáneo
+    const btnSimulate = ticketCard.querySelector('.btn-simulate-scan');
+    if (btnSimulate) {
+      btnSimulate.addEventListener('click', (e) => {
+        e.preventDefault();
+        addTicketToWallet(concert.id);
+      });
+    }
   });
 }
 
-// 5. Renderizado del Announcement Bar (Top Bar dinámico con conciertos y multi-idioma)
+// 7. Renderizado del Announcement Bar (Top Bar dinámico con conciertos y multi-idioma)
 function renderAnnouncements() {
   const track = document.getElementById('announcementTrack');
   const badgeText = document.getElementById('announcementBadgeText');
@@ -172,7 +494,6 @@ function renderAnnouncements() {
     return;
   }
 
-  // Generamos los items para los conciertos
   const concertItems = AppState.concerts.map((concert, index) => {
     const formattedDate = getFutureDate(concert.daysOffset || 3);
     return `
@@ -189,15 +510,13 @@ function renderAnnouncements() {
     `;
   }).join('<span class="announcement-bullet">★</span>');
 
-  // Duplicamos el contenido para garantizar un bucle continuo e infinito (seamless marquee)
   track.innerHTML = `
     <div class="announcement-content">${concertItems}</div>
     <div class="announcement-content" aria-hidden="true">${concertItems}</div>
   `;
 
-  // Interacción al hacer click en un item del ticker: scroll suave al ticket correspondiente
   track.querySelectorAll('.announcement-item').forEach(el => {
-    el.addEventListener('click', (e) => {
+    el.addEventListener('click', () => {
       const idx = el.getAttribute('data-concert-index');
       const cards = document.querySelectorAll('.ticket-card');
       if (cards && cards[idx]) {
@@ -211,7 +530,7 @@ function renderAnnouncements() {
   });
 }
 
-// Cargar conciertos
+// 8. Cargar conciertos desde JSON
 async function loadConcerts() {
   try {
     const res = await fetch('data/concerts.json');
@@ -225,12 +544,56 @@ async function loadConcerts() {
 function renderApp() {
   renderAnnouncements();
   renderConcerts();
+  updateBadgeCount();
 }
 
-// Inicialización
+// 9. Inicialización de Listeners y SDK WhatAuth
+function setupEventListeners() {
+  const btnMyTickets = document.getElementById('btnMyTickets');
+  if (btnMyTickets) {
+    btnMyTickets.addEventListener('click', () => toggleDrawer(true));
+  }
+
+  const btnCloseDrawer = document.getElementById('btnCloseDrawer');
+  if (btnCloseDrawer) {
+    btnCloseDrawer.addEventListener('click', () => toggleDrawer(false));
+  }
+
+  const overlay = document.getElementById('ticketsDrawerOverlay');
+  if (overlay) {
+    overlay.addEventListener('click', () => toggleDrawer(false));
+  }
+
+  const btnClearTickets = document.getElementById('btnClearTickets');
+  if (btnClearTickets) {
+    btnClearTickets.addEventListener('click', () => {
+      if (AppState.wallet.length > 0) {
+        clearWallet();
+      }
+    });
+  }
+
+  // Cerrar Drawer con tecla Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      toggleDrawer(false);
+    }
+  });
+
+  // Listener global de eventos de WhatAuth SDK
+  window.addEventListener('whatauth:success', (e) => {
+    console.log('[WhatAuth SDK] Verificación exitosa detectada:', e.detail);
+    if (AppState.concerts.length > 0) {
+      addTicketToWallet(AppState.concerts[0].id);
+    }
+  });
+}
+
+// Inicialización de la aplicación
 document.addEventListener('DOMContentLoaded', async () => {
+  setupEventListeners();
+  loadWallet();
   await initI18n();
   await loadConcerts();
   renderApp();
 });
-
