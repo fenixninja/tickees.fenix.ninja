@@ -409,14 +409,6 @@ function getWhatAuthSocket() {
   });
 
   // 2. Recepción de confirmación cuando el usuario escanea y envía el WhatsApp
-  const handleScanVerification = (data) => {
-    console.log('[WhatAuth WS] 🎯 ¡Verificación de escaneo recibida en tiempo real!', data);
-    const sessionId = data?.sessionId;
-    const concertId = (sessionId && AppState.activeSessions[sessionId]) || AppState.pendingConcertId || 'c1';
-
-    addTicketToWallet(concertId);
-  };
-
   socket.on('res_pixel_qr', handleScanVerification);
   socket.on('qr_verified', handleScanVerification);
 
@@ -426,6 +418,35 @@ function getWhatAuthSocket() {
 
   AppState.socket = socket;
   return socket;
+}
+
+// Deduplicador estricto para garantizar exactamente 1 entrada por escaneo físico
+const verifiedSessionIds = new Set();
+let lastVerifiedTime = 0;
+
+function handleScanVerification(data) {
+  const sessionId = data?.sessionId || '';
+  const now = Date.now();
+
+  // Deduplicación estricta: un escaneo / sessionId solo añade 1 entrada
+  if (sessionId && verifiedSessionIds.has(sessionId)) {
+    console.log('[WhatAuth WS] 🛑 Sesión ya procesada (evitando compra duplicada):', sessionId);
+    return;
+  }
+  if (now - lastVerifiedTime < 2000) {
+    console.log('[WhatAuth WS] 🛑 Evento duplicado en ráfaga suprimido (< 2s)');
+    return;
+  }
+
+  if (sessionId) {
+    verifiedSessionIds.add(sessionId);
+  }
+  lastVerifiedTime = now;
+
+  console.log('[WhatAuth WS] 🎯 ¡Verificación única de escaneo procesada (1 entrada)!', data);
+  const concertId = (sessionId && AppState.activeSessions[sessionId]) || AppState.pendingConcertId || 'c1';
+
+  addTicketToWallet(concertId);
 }
 
 function requestTicketQr(concertId) {
@@ -798,17 +819,10 @@ function setupEventListeners() {
   // Inicializar conexión WebSocket de WhatAuth
   getWhatAuthSocket();
 
-  // Listener global de eventos de WhatAuth SDK (cubre eventos DOM emitidos por el SDK como fallback)
-  const onWhatAuthVerified = (e) => {
-    console.log('[WhatAuth SDK] Verificación recibida desde SDK:', e.detail);
-    const sessionId = e.detail?.sessionId;
-    const concertId = (sessionId && AppState.activeSessions[sessionId]) || AppState.pendingConcertId || 'c1';
-    addTicketToWallet(concertId);
-  };
-
-  window.addEventListener('whatauth:success', onWhatAuthVerified);
-  window.addEventListener('whatauth:pixel', onWhatAuthVerified);
-  window.addEventListener('whatauth:pixel_verified', onWhatAuthVerified);
+  // Listener de eventos DOM como fallback de WhatAuth SDK (deduplicado)
+  window.addEventListener('whatauth:pixel_verified', (e) => {
+    handleScanVerification(e.detail || {});
+  });
 }
 
 // Inicialización de la aplicación
