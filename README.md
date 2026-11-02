@@ -1,36 +1,36 @@
-# 🎟️ TICKEES — WhatAUTH & WhatsApp QR Demo
+# 🎟️ TICKEES — Smart Concert Tickets (WhatAuth Pixel Integration)
 
-Demostración técnica de ticketing interactivo y diseño de boletos digitales orientados a la integración de autenticación, validación y entrega de entradas mediante **WhatAUTH** y **códigos QR de WhatsApp**.
+Demostración de ticketing interactivo, diseño de boletos troquelados y compra sin contraseñas en tiempo real mediante **WhatAuth Pixel QR** y **WhatsApp**.
 
-> 🌐 **Demo en vivo:** [https://tickees.fenix.ninja/](https://tickees.fenix.ninja/)
+> 🌐 **Demo en producción:** [https://tickees.fenix.ninja/](https://tickees.fenix.ninja/)
 
 ---
 
-## 📌 Propósito del Proyecto
+## 📌 Propósito y Arquitectura
 
-El objetivo primordial de este proyecto es ilustrar y servir de prueba de concepto (PoC) para:
-- **Demostrar el uso de WhatAUTH**: Autenticación fluida y sin contraseñas a través de WhatsApp.
-- **Validación y entrega vía QR de WhatsApp**: Emisión, visualización e interacción con tickets digitales vinculados directamente al ecosistema de WhatsApp para validación de accesos en eventos y conciertos en tiempo real.
-- **Experiencia de usuario inmersiva (Ticketing)**: Modelado de entrada con perforado y corte troquelado realista, datos desacoplados en esquemas dinámicos, soporte multi-idioma nativo (i18n) y fechas inteligentes siempre vigentes.
+El proyecto ilustra la integración del **Pixel QR de WhatAuth** en una Single Page Application estática (GitHub Pages) sin backend propio:
+
+* **Compra y Verificación en Tiempo Real:** El usuario pulsa *"COMPRAR ENTRADA"*, el frontend solicita una sesión efímera al backend de WhatAuth mediante WebSocket (`req_pixel_qr`), y al escanear desde WhatsApp el evento `res_pixel_qr` confirma la adquisición en milisegundos.
+* **Modo Adaptativo Inteligente (Escritorio vs Móvil):**
+  * **En Escritorio (`> 768px`):** Se renderiza un QR de alta definición (190x190px con `QRCodeStyling`) para escanear directamente con el móvil.
+  * **En Móvil (`<= 768px`):** Como el usuario no puede escanear la pantalla de su propio dispositivo, el QR se oculta automáticamente y se muestra de forma destacada el botón **"💬 Comprar en WhatsApp"**.
+* **Ciclo de Vida del Boleto en 3 Estados:**
+  1. **Estado Inicial:** Muestra los datos del concierto, precio, fecha dinámica, número de serie y el botón verde *"COMPRAR ENTRADA"*.
+  2. **Estado de Compra (QR / WhatsApp):** Al pulsar comprar, el código de barras inferior se oculta automáticamente para dejar espacio limpio al QR grande (escritorio) o al botón directo (móvil).
+  3. **Estado Confirmado:** Tras enviar el mensaje de WhatsApp y recibir la confirmación por WebSocket, la tarjeta pasa a **`✓ COMPRA REALIZADA`**, muestra el número de entradas adquiridas y habilita la opción de comprar otra unidad.
+* **Cartera / Wallet en `localStorage`:** Los boletos adquiridos se guardan de forma persistente en el navegador, con Drawer deslizante lateral, desglose por concierto, cálculo de importe total y contador reactivo en el header.
+* **Deduplicación Criptográfica Estricta:** Manejo defensivo por `sessionId` y debounce para garantizar que cada escaneo físico añada exactamente **1 entrada** a la cartera.
 
 ---
 
 ## 🚀 Características Principales
 
-- **Integración Conceptual WhatAUTH / WhatsApp QR**: Flujo visual preparado para asociar la identidad del comprador y la validez de la entrada a través de un canal directo y seguro de WhatsApp.
-- **Diseño Troquelado Físico (Die-Cut Effect)**: Recreación visual de perforaciones y dientes de rasgado de entradas clásicas mediante CSS puro y matemáticas de recorte sin artefactos de renderizado.
-- **Desacoplamiento de Datos (JSON-Driven)**: El catálogo de conciertos y las entradas se alimentan enteramente desde `data/concerts.json`.
-- **Motor de Fechas Dinámicas**: Algoritmo que calcula eventos siempre a futuro a partir de la fecha de apertura (`daysOffset`), garantizando que la demo nunca expire.
-- **Internacionalización (i18n) Completa**: Detección automática del idioma del navegador, persistencia en `localStorage` y soporte para 7 idiomas:
-  - 🇪🇸 Español (`es`)
-  - 🇺🇸 English (`en`)
-  - 🇩🇪 Deutsch (`de`)
-  - 🇫🇷 Français (`fr`)
-  - 🇮🇳 हिन्दी (`hi`)
-  - 🇨🇳 中文 (`zh`)
-  - 🇯🇵 日本語 (`ja`)
-- **Código de Barras y Seriales Generados por Software**: Renderizado dinámico de patrones de barras binarias y secuencias seriales de seguridad.
-- **Preparado para PWA**: Soporte de favicons y manifiesto para comportamiento standalone e instalable.
+* **Integración Nativa WhatAuth Pixel:** Conexión Socket.IO con `https://api.whatauth.com` vinculada a la línea WhatsApp Cloud dedicada (`+34627118121`).
+* **Diseño Troquelado Físico (Die-Cut Effect):** Muescas semicirculares superiores e inferiores y línea de perforado discontinua simulando entradas clásicas mediante CSS puro.
+* **Desacoplamiento de Datos (JSON-Driven):** Catálogo de conciertos alimentado desde [`data/concerts.json`](file:///Users/fenixrios/Documents/CODIGO/ticket/data/concerts.json).
+* **Motor de Fechas Dinámicas:** Fechas calculadas en tiempo de ejecución a partir de `daysOffset` para que los eventos figuren siempre a futuro.
+* **Internacionalización (i18n) en 7 Idiomas:** Soporte declarativo con selector y detección automática del navegador (`es`, `en`, `de`, `fr`, `hi`, `zh`, `ja`) en [`data/translations.json`](file:///Users/fenixrios/Documents/CODIGO/ticket/data/translations.json).
+* **Código de Barras y Seriales por Software:** Generación procedural de números de serie y patrones de barras binarias en CSS/HTML.
 
 ---
 
@@ -38,54 +38,36 @@ El objetivo primordial de este proyecto es ilustrar y servir de prueba de concep
 
 ```plaintext
 ticket/
-├── index.html              # Estructura semántica HTML5
-├── style.css               # Sistema de diseño, layout flex/grid y efectos troquelados
-├── index.js                # Lógica de render dinámico, cálculo de fechas e i18n
-├── guide.md                # Guía técnica profunda de la arquitectura
-├── agent.md                # Especificaciones funcionales del prototipo
+├── index.html              # Estructura semántica, favicons, Socket.IO y QR Code Styling
+├── style.css               # Diseño troquelado, layout responsive, animaciones y adaptación móvil
+├── index.js                # Lógica de compra, WebSocket WhatAuth, Wallet y deduplicación
 ├── data/
-│   ├── concerts.json       # Base de datos de conciertos y tickets
-│   └── translations.json   # Diccionario con 7 idiomas
+│   ├── concerts.json       # Catálogo de conciertos y metadatos de asientos
+│   └── translations.json   # Diccionario completo en 7 idiomas
 ├── img/
-│   └── fnx_paradise.jpeg   # Poster de muestra del concierto
-└── fenix_icons/            # Assets de iconos y favicons multiplataforma
+│   ├── fnx_paradise.jpeg   # Poster del concierto principal
+│   ├── disco_nights.jpeg   # Poster temático retro
+│   ├── velazqeus_pop.jpeg  # Poster de pop experience
+│   └── fnxrasta.jpeg       # Poster reggae
+└── fenix_icons/            # Favicons e iconos de marca
 ```
 
 ---
 
 ## 🛠️ Instalación y Uso Local
 
-No requiere dependencias complejas ni transpiladores:
+No requiere dependencias ni transpiladores:
 
-1. Clona este repositorio:
-   ```bash
-   git clone https://github.com/tu-usuario/ticket.git
-   cd ticket
-   ```
+```bash
+git clone https://github.com/fenixninja/tickees.fenix.ninja.git
+cd tickees.fenix.ninja
+python3 -m http.server 8080
+```
 
-2. Abre la aplicación con un servidor local (por ejemplo, con Live Server de VSCode o Python):
-   ```bash
-   # Con Python 3
-   python3 -m http.server 8080
-   ```
-
-3. Accede en tu navegador a `http://localhost:8080`.
+Accede en tu navegador a `http://localhost:8080`.
 
 ---
 
-## ⚖️ Licencia de Uso No Comercial y Atribución
+## ⚖️ Licencia y Atribución
 
-Este proyecto está publicado bajo una **Licencia No Comercial con Atribución**.
-
-- **Atribución Requerida**: Debes otorgar el crédito correspondiente, proporcionar un enlace a este repositorio y especificar si se han realizado cambios.
-- **Uso No Comercial**: No está permitido el uso de este material, su código o derivados con propósitos comerciales o de lucro directo o indirecto sin el consentimiento expreso previo del autor original.
-
----
-
-## 🙏 Reconocimientos e Inspiración de Diseño
-
-El diseño visual, estilo de entrada y detalles de maquetación han sido inspirados en los trabajos y conceptos de los siguientes autores:
-
-- **A.J. Skelton**: [Movie Ticket en CodePen](https://codepen.io/ajskelton/pen/NdrjBm)
-- **Dribbble Movie Ticket Concept**: [Movie Ticket Attachment en Dribbble](https://dribbble.com/shots/1166639-Movie-Ticket/attachments/1166639?mode=media)
-- **Kyle Wetton**: [CSS Ticket en CodePen](https://codepen.io/kylewetton/pen/yLBwdJX)
+Este proyecto está publicado bajo licencia no comercial con atribución. Basado en conceptos de diseño de boletos troquelados clásicos e integrado con la plataforma de autenticación y pixels de [WhatAuth](https://whatauth.com).
